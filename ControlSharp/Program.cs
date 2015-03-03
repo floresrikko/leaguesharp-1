@@ -211,7 +211,7 @@ namespace ControlSharp
 
             Controller.Update();
             UpdateStates();
-
+            Console.WriteLine(Controller.LeftStick.Position);
             var p = ObjectManager.Player.ServerPosition.To2D() + (Controller.LeftStick.Position / 75);
             var pos = new Vector3(p.X, p.Y, ObjectManager.Player.Position.Z);
             Console.WriteLine(pos);
