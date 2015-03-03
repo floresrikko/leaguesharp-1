@@ -29,7 +29,9 @@ namespace AutoLeveler
             Game.OnWndProc += Game_OnWndProc;
             AppDomain.CurrentDomain.DomainUnload += CurrentDomain_DomainUnload;
             AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
         }
+
 
         public Vector2 Position
         {
@@ -72,6 +74,11 @@ namespace AutoLeveler
         }
 
         private void CurrentDomain_DomainUnload(object sender, EventArgs e)
+        {
+            Dispose();
+        }
+
+        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             Dispose();
         }
