@@ -23,6 +23,7 @@ namespace ControlSharp
         public static Render.Circle CurrentPosition;
         public static Render.Text Text;
         public static float MaxD = 0;
+        public static uint LastKey;
 
         private static void Main(string[] args)
         {
@@ -98,6 +99,7 @@ namespace ControlSharp
                 {
                     CurrentMode = Orbwalking.OrbwalkingMode.Combo;
                     key = Menu.Item("Orbwalk").GetValue<KeyBind>().Key;
+                    Console.WriteLine(key);
                 }
                 else if (Controller.DPad.Left)
                 {
@@ -115,8 +117,13 @@ namespace ControlSharp
                     key = Menu.Item("LastHit").GetValue<KeyBind>().Key;
                 }
 
-                keybd_event(
-                    (byte) key, 0, (int) KeyboardEvents.KEYBDEVENTF_KEYDOWN | (int) KeyboardEvents.KEYBDEVENTF_KEYUP, 0);
+                if (LastKey == key)
+                {
+                    return;
+                }
+
+                LastKey.Release();
+                key.Press();
             }
 
             //Push any button to cancel mode
@@ -124,6 +131,7 @@ namespace ControlSharp
                 Controller.RightShoulder || Controller.Back || Controller.Start || Controller.RightStick.Clicked)
             {
                 CurrentMode = Orbwalking.OrbwalkingMode.None;
+                LastKey.Release();
             }
 
             var s1 = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Summoner1);
@@ -140,11 +148,8 @@ namespace ControlSharp
             }
 
             Text.text = "MODE: " + CurrentMode;
-            OrbWalker.ActiveMode = CurrentMode;
+            //OrbWalker.ActiveMode = CurrentMode;
         }
-
-        [DllImport("user32.dll", EntryPoint = "keybd_event", CharSet = CharSet.Auto, ExactSpelling = true)]
-        public static extern void keybd_event(byte vk, byte scan, int flags, int extrainfo);
 
         private static void SummonerCastLogic(SpellDataInst spell)
         {
@@ -195,6 +200,7 @@ namespace ControlSharp
             {
                 CurrentMode = Orbwalking.OrbwalkingMode.None;
                 OrbWalker.ActiveMode = CurrentMode;
+                LastKey.Release();
                 return;
             }
 
@@ -219,6 +225,24 @@ namespace ControlSharp
 
             CurrentPosition.Position = pos;
             OrbWalker.SetOrbwalkingPoint(pos);
+        }
+    }
+
+    public static class Utils
+    {
+        [DllImport("user32.dll", EntryPoint = "keybd_event", CharSet = CharSet.Auto, ExactSpelling = true)]
+        public static extern void keybd_event(byte vk, byte scan, int flags, int extrainfo);
+
+        public static void Press(this uint key)
+        {
+            keybd_event((byte) key, 0, (int) KeyboardEvents.KEYBDEVENTF_KEYDOWN, 0);
+            Program.LastKey = key;
+        }
+
+        public static void Release(this uint key)
+        {
+            Program.LastKey = 0;
+            keybd_event((byte) key, 0, (int) KeyboardEvents.KEYBDEVENTF_KEYUP, 0);
         }
     }
 }
