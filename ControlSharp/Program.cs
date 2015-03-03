@@ -2,6 +2,7 @@
 
 using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
@@ -30,10 +31,8 @@ namespace ControlSharp
 
         private static void Game_OnGameLoad(EventArgs args)
         {
-            foreach (
-                var c in
-                    ControllerArray.Select(controlId => new Controller((UserIndex) controlId)).Where(c => c.IsConnected)
-                )
+            foreach (var c in
+                ControllerArray.Select(controlId => new Controller((UserIndex) controlId)).Where(c => c.IsConnected))
             {
                 Controller = new GamepadState(c.UserIndex);
             }
@@ -45,7 +44,10 @@ namespace ControlSharp
             }
 
             Menu = new Menu("ControllerTest", "ControllerTest", true);
-            OrbWalker = new Orbwalking.Orbwalker(Menu);
+
+            Menu.AddSubMenu(new Menu("Orbwalker", "Orbwalker"));
+            OrbWalker = new Orbwalking.Orbwalker(Menu.SubMenu("Orbwalker"));
+
             Menu.AddItem(new MenuItem("Draw", "Draw Circle").SetValue(true));
             Menu.AddToMainMenu();
 
@@ -90,22 +92,31 @@ namespace ControlSharp
         {
             if (Controller.DPad.Count == 1) // Change mode command
             {
+                uint key = 0;
+
                 if (Controller.DPad.Up)
                 {
                     CurrentMode = Orbwalking.OrbwalkingMode.Combo;
+                    key = Menu.Item("Orbwalk").GetValue<KeyBind>().Key;
                 }
                 else if (Controller.DPad.Left)
                 {
                     CurrentMode = Orbwalking.OrbwalkingMode.LaneClear;
+                    key = Menu.Item("LaneClear").GetValue<KeyBind>().Key;
                 }
                 else if (Controller.DPad.Right)
                 {
                     CurrentMode = Orbwalking.OrbwalkingMode.Mixed;
+                    key = Menu.Item("Farm").GetValue<KeyBind>().Key;
                 }
                 else if (Controller.DPad.Down)
                 {
                     CurrentMode = Orbwalking.OrbwalkingMode.LastHit;
+                    key = Menu.Item("LastHit").GetValue<KeyBind>().Key;
                 }
+
+                keybd_event(
+                    (byte) key, 0, (int) KeyboardEvents.KEYBDEVENTF_KEYDOWN | (int) KeyboardEvents.KEYBDEVENTF_KEYUP, 0);
             }
 
             //Push any button to cancel mode
@@ -131,6 +142,9 @@ namespace ControlSharp
             Text.text = "MODE: " + CurrentMode;
             OrbWalker.ActiveMode = CurrentMode;
         }
+
+        [DllImport("user32.dll", EntryPoint = "keybd_event", CharSet = CharSet.Auto, ExactSpelling = true)]
+        public static extern void keybd_event(byte vk, byte scan, int flags, int extrainfo);
 
         private static void SummonerCastLogic(SpellDataInst spell)
         {
