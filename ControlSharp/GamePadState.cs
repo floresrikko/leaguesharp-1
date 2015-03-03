@@ -156,4 +156,17 @@ namespace ControlSharp
             return value < 0 ? 0 : value > 1 ? 1 : value;
         }
     }
+
+    public static class Utilities
+    {
+        public static bool IsAnyPressed(this GamepadState.DPadState dpad)
+        {
+            return dpad.Count > 0;
+        }
+
+        public static bool IsABXYPressed(this GamepadState controller)
+        {
+            return controller.A || controller.B || controller.X || controller.Y;
+        }
+}
 }

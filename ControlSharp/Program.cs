@@ -91,27 +91,26 @@ namespace ControlSharp
 
         private static void UpdateStates()
         {
-            if (Controller.DPad.Count == 1) // Change mode command
+            if (Controller.DPad.IsAnyPressed() || Controller.IsABXYPressed()) // Change mode command
             {
                 uint key = 0;
 
-                if (Controller.DPad.Up)
+                if (Controller.DPad.Up || Controller.X)
                 {
                     CurrentMode = Orbwalking.OrbwalkingMode.Combo;
                     key = Menu.Item("Orbwalk").GetValue<KeyBind>().Key;
-                    Console.WriteLine(key);
                 }
-                else if (Controller.DPad.Left)
+                else if (Controller.DPad.Left || Controller.A)
                 {
                     CurrentMode = Orbwalking.OrbwalkingMode.LaneClear;
                     key = Menu.Item("LaneClear").GetValue<KeyBind>().Key;
                 }
-                else if (Controller.DPad.Right)
+                else if (Controller.DPad.Right || Controller.Y)
                 {
                     CurrentMode = Orbwalking.OrbwalkingMode.Mixed;
                     key = Menu.Item("Farm").GetValue<KeyBind>().Key;
                 }
-                else if (Controller.DPad.Down)
+                else if (Controller.DPad.Down || Controller.B)
                 {
                     CurrentMode = Orbwalking.OrbwalkingMode.LastHit;
                     key = Menu.Item("LastHit").GetValue<KeyBind>().Key;
@@ -127,8 +126,7 @@ namespace ControlSharp
             }
 
             //Push any button to cancel mode
-            if (Controller.A || Controller.B || Controller.X || Controller.Y || Controller.LeftShoulder ||
-                Controller.RightShoulder || Controller.Back || Controller.Start || Controller.RightStick.Clicked)
+            if (Controller.LeftShoulder || Controller.RightShoulder || Controller.Back || Controller.Start || Controller.RightStick.Clicked)
             {
                 CurrentMode = Orbwalking.OrbwalkingMode.None;
                 LastKey.Release();
@@ -216,13 +214,13 @@ namespace ControlSharp
 
             var p = ObjectManager.Player.ServerPosition.To2D() + (Controller.LeftStick.Position / 75);
             var pos = new Vector3(p.X, p.Y, ObjectManager.Player.Position.Z);
-
+            Console.WriteLine(pos);
             if (ObjectManager.Player.Distance(pos) < 75)
             {
                 return;
             }
 
-
+            Console.WriteLine("SETORBWALKING POSITION");
             CurrentPosition.Position = pos;
             OrbWalker.SetOrbwalkingPoint(pos);
         }
