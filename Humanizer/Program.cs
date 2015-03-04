@@ -34,12 +34,12 @@ namespace Humanizer
                 var spell = SpellList[i];
                 var menu = spells.AddSubMenu(new Menu(spell, spell));
                 menu.AddItem(new MenuItem("Enabled" + i, "Delay " + spell, true).SetValue(true));
-                menu.AddItem(new MenuItem("Delay" + i, "Cast Delay", true).SetValue(new Slider(80, 0, 400)));
+                menu.AddItem(new MenuItem("Delay" + i, "Cast Delay", true).SetValue(new Slider(80, 0, 2000)));
             }
 
             var move = Menu.AddSubMenu(new Menu("Movement", "Movement"));
             move.AddItem(new MenuItem("MovementEnabled", "Enabled").SetValue(true));
-            move.AddItem(new MenuItem("MovementDelay", "Movement Delay")).SetValue(new Slider(80, 0, 400));
+            move.AddItem(new MenuItem("MovementDelay", "Movement Delay")).SetValue(new Slider(80, 0, 2000));
 
             Menu.AddToMainMenu();
 
